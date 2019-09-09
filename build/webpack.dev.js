@@ -5,14 +5,39 @@ const devConfig = {
     mode: "development",   // 默认模式是production, 还可以 填写development
     devtool: 'cheap-module-eval-source-map',  // development  // js sourceMap 默认是开启的 
     // devtool: 'cheap-module-source-map',       // production  
-    
+    module: {
+        rules: [
+            /***************** postcss-loader/scss-loader *********************/
+            {
+                test: /\.scss$/,  // 处理样式loader
+                use: [  // loader的执行顺序是从右到左，从下到上
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            importLoaders: 2,  // 在使用@import "a.scss"执行之前也需要走sass-loader和postcss-loader的处理
+                            // modules: true,      // 开启css模块化, import style from 'a.css'; 所有样式都在style变量中
+                            sourceMap: true
+                        }
+                    },
+                    'sass-loader',
+                    'postcss-loader'   // 配置css3新样式的前缀，又一个配置文件postcss.config.js
+                ]
+            },
+            /***************** style-loader/css-loader *********************/
+            {
+                test: /\.css$/,  // 处理样式loader
+                use: [  // loader的执行顺序是从右到左，从下到上
+                    'style-loader',
+                    'css-loader',
+                    'postcss-loader'   // 配置css3新样式的前缀，又一个配置文件postcss.config.js
+                ]
+            },
+        ]
+    },
     plugins: [  // plugin可以在webpack运行到某个时刻的时候，帮你做一些事情，类似生命周期函数s
         new webpack.HotModuleReplacementPlugin()
     ],
-    optimization: { // Tree Shaking 在开发环境是没有的
-        // Tree Shaking 模式在development 只是提示作用，但是在 production模式才会真正运用，甚至不需要写 optimization这个配置
-        usedExports: true   // 开启之后还需要设置package.json =>  "sideEffects": ["@babel/polly-fill", "*.css"],
-    },
     devServer: {
         host: '0.0.0.0',
         port: 8999,

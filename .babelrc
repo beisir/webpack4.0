@@ -6,14 +6,16 @@
         }],
 
         "@babel/preset-react"
-    ]
+    ],
 
-    // "plugins": [
-    //     ["@babel/plugin-transform-runtime", {
-    //         "corejs": 2, // 如果值为2 需要额外安装一个包: npm install --save @babel/runtime-corejs2
-    //         "helpers": true,
-    //         "regenerator": true,
-    //         "useESModules": false
-    //     }]
-    // ]   
+    "plugins": [
+        "@babel/plugin-syntax-dynamic-import"      // babel官方支持的异步引入的插件 
+        // "babel-plugin-dynamic-import-webpack"   // 转译最新的异步的实验性质的语法等但是非官放 
+        // ["@babel/plugin-transform-runtime", {
+        //     "corejs": 2, // 如果值为2 需要额外安装一个包: npm install --save @babel/runtime-corejs2
+        //     "helpers": true,
+        //     "regenerator": true,
+        //     "useESModules": false
+        // }]
+    ]   
 }

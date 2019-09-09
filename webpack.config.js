@@ -94,6 +94,7 @@ module.exports = {
                     // @babel/plugin-transform-runtime 和@babel/runtime 会以闭包的方式注入组件不会污染全局变量
                     // @babel/polyfill 会污染全局变量 
                     /* plugins: [
+                        "babel-plugin-dynamic-import-webpack", // 转译最新的异步的实验性质的语法等
                         ["@babel/plugin-transform-runtime", {
                             "corejs": 2, // 如果值为2,会自动将不存在的方法打包进入， 需要额外安装一个包: npm install --save @babel/runtime-corejs2
                             "helpers": true,

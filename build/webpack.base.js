@@ -4,14 +4,15 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 
 module.exports = {
-    entry: {    
-        main: ['./src/index.js']
+    entry: {
+        main: './src/index.js'
     },
     output: {
         
         filename: '[name].js',  // 打包之后生成的名字
-        path: path.resolve(__dirname, 'dist'),   // 生成的打包文件所在的文件夹路径，不写path默认是dist
-        publicPath: '/'     // 生成的链接前缀
+        path: path.resolve(__dirname, '../dist'),   // 生成的打包文件所在的文件夹路径，不写path默认是dist
+        publicPath: './',     // 生成的链接前缀
+        chunkFilename: '[name].chunk.js',
     },
     module: {   // 模块配置
         rules: [    // 规则配置
@@ -36,32 +37,6 @@ module.exports = {
                         outputPath: 'font/',         // 输出打包文件的目录
                     }
                 }
-            },
-            /***************** postcss-loader/scss-loader *********************/
-            {
-                test: /\.scss$/,  // 处理样式loader
-                use: [  // loader的执行顺序是从右到左，从下到上
-                    'style-loader',
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            importLoaders: 2,  // 在使用@import "a.scss"执行之前也需要走sass-loader和postcss-loader的处理
-                            // modules: true,      // 开启css模块化, import style from 'a.css'; 所有样式都在style变量中
-                            sourceMap: true
-                        }
-                    },
-                    'sass-loader',
-                    'postcss-loader'   // 配置css3新样式的前缀，又一个配置文件postcss.config.js
-                ]
-            },
-            /***************** style-loader/css-loader *********************/
-            {
-                test: /\.css$/,  // 处理样式loader
-                use: [  // loader的执行顺序是从右到左，从下到上
-                    'style-loader',
-                    'css-loader',
-                    'postcss-loader'   // 配置css3新样式的前缀，又一个配置文件postcss.config.js
-                ]
             },
             /***************** babel-loader *********************/
             {
@@ -103,11 +78,45 @@ module.exports = {
  
         ]
     },
+    optimization: {  // Tree Shaking 在开发环境是没有的
+
+        // Tree Shaking 模式在development 只是提示作用，但是在 production模式才会真正运用，甚至不需要写 optimization这个配置
+        usedExports: true,   // 开启之后还需要设置package.json =>  "sideEffects": ["@babel/polly-fill", "*.css"],
+        // 代码分隔和webpack无关。webpack中实现代码分隔：两种方式
+        // 1: 同步的代码分隔配置，做optimization.splitChunks的的配置即可
+        // 2: 异步代码转换分隔配置 --官方支持"plugins": ["@babel/plugin-syntax-dynamic-import"]  
+        // 2: 异步代码转译分隔配置 --非官方，不支持魔法注释"plugins": ["babel-plugin-dynamic-import-webpack"] // 转译最新的异步的实验性质的语法等
+        // 异步代码实例 import("lodash").then(() => {...});
+        splitChunks: {  // 代码分隔,当遇到公共的类库时，会自动将公共库分离打包，
+            chunks: "all", // async 异步代码分隔  all 同步异步代码都进行分隔, 默认只为异步代码进行分隔，如果为all 则需要记性cacheGroups 
+            minSize: 30000,    // 打包代码小于minSize 则不单独打包，不做代码分隔
+            minChunks: 1,      // 当一个模块被用了至少多少次的时候才进行代码分隔 
+            maxAsyncRequests: 5,    // 同时加载的模块数最多是5个，超过5个，就不做代码分隔
+            maxInitialRequests: 3,  // 入口文件最多引入3个库，进行代码分隔，超过之后就不做分隔
+            automaticNameDelimiter: '_',    // 文件生成之后进行分隔，在不设置filename的情况下
+            name: true,
+            cacheGroups: {  // 缓存组
+                vendors: {  // 如果chunks = all 进行下方配置
+                    test: /[\\/]node_modules[\\/]/,     // 引入的库是否是在node_modules内 
+                    priority: -10,  // 优先级，如果符合缓存组的条件，则看优先级    
+                    // filename: "vendors.js"   //  设置打包之后的文件名 
+                },
+                default: {  // 如果打包的代码 小于minSize 且不在node_modules 内，则执行下面配置
+                    // minChunks: 2,    
+                    priority: -20,  // 优先级   
+                    reuseExistingChunk: true,   // 如果一个模块已经被打包过了，则在打包的时候直接使用之前打包的
+                    filename: 'default.js'
+                }
+            }  
+        } 
+    },
     plugins: [  // plugin可以在webpack运行到某个时刻的时候，帮你做一些事情，类似生命周期函数
         new HtmlWebpackPlugin({ // 会在打包结束后自动生成一个html文件，并把打包生成的js自动引入html中
             title: "webpack4.0",
             template: 'src/index.html'  // 模版文件，
         }),
-        new CleanWebpackPlugin(['dist']),    // 清除打包文件夹
+        new CleanWebpackPlugin(['dist'], {   // 清除打包文件夹
+            root: path.resolve(__dirname, '../')    // 当前目录的上一级
+        }), 
     ],
 };

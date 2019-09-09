@@ -13,3 +13,7 @@ webpack-cli 的作用时可以使webpack命令正确运行
 
 ```
 
+
+### 浏览器检测性能
+command + shift + p   >   coverage
+

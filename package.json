@@ -6,15 +6,17 @@
   "private": true,
   "sideEffects: 如果配置了Tree Shaking 那么webpack只要打包一个模块就会运用Tree Shaking的方式": "",
   "sideEffects2: 如果引入没有export的模块，就不会被打包进入, 比如@babel/polly-fill": "可以使用sideEffects 取消Tree Shaking的文件， 如果没有需要取消的 tree Shaking 则设为false",
-  "sideEffects3": [
+  "sideEffects": [
     "@babel/polly-fill",
     "*.css"
   ],
-  "sideEffects": false,
+  "sideEffects3": false,
   "scripts": {
     "bundle npx": "如果在 package.json script 加入命令，默认会从当前项目下的nodemodules下寻找依赖，和npx概念一样",
     "bundle": "webpack",
     "watch": "webpack --watch",
+    "webpack --profile --json > stats.json": "用来生成一个打包文件的打包情况，使用http://webpack.github.io/analyse/查看",
+    "dev-build": "webpack --profile --json > stats.json --config build/webpack.dev.js",
     "dev": "webpack-dev-server --config build/webpack.dev.js",
     "build": "npx webpack --config build/webpack.prod.js",
     "middleware": "node server.js"
@@ -23,6 +25,7 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.5.5",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/plugin-transform-runtime": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
@@ -33,7 +36,9 @@
     "express": "^4.17.1",
     "file-loader": "^4.2.0",
     "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.8.0",
     "node-sass": "^4.11.0",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
     "postcss-loader": "^3.0.0",
     "sass-loader": "^8.0.0",
     "style-loader": "^1.0.0",
@@ -48,6 +53,8 @@
     "@babel/polyfill": "^7.4.4",
     "@babel/runtime": "^7.5.5",
     "@babel/runtime-corejs2": "^7.5.5",
+    "jquery": "^3.4.1",
+    "lodash": "^4.17.15",
     "react": "^16.9.0",
     "react-dom": "^16.9.0"
   }
