@@ -4,11 +4,19 @@
   "description": "",
   "private 代表私有项目，不会被发布到npm之上": "",
   "private": true,
+  "sideEffects: 如果配置了Tree Shaking 那么webpack只要打包一个模块就会运用Tree Shaking的方式": "",
+  "sideEffects2: 如果引入没有export的模块，就不会被打包进入, 比如@babel/polly-fill": "可以使用sideEffects 取消Tree Shaking的文件， 如果没有需要取消的 tree Shaking 则设为false",
+  "sideEffects3": [
+    "@babel/polly-fill",
+    "*.css"
+  ],
+  "sideEffects": false,
   "scripts": {
     "bundle npx": "如果在 package.json script 加入命令，默认会从当前项目下的nodemodules下寻找依赖，和npx概念一样",
     "bundle": "webpack",
     "watch": "webpack --watch",
-    "start": "webpack-dev-server",
+    "dev": "webpack-dev-server --config build/webpack.dev.js",
+    "build": "npx webpack --config build/webpack.prod.js",
     "middleware": "node server.js"
   },
   "author": "beisir",
@@ -17,6 +25,7 @@
     "@babel/core": "^7.5.5",
     "@babel/plugin-transform-runtime": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
     "autoprefixer": "^9.6.1",
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^1.0.0",
@@ -32,11 +41,14 @@
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.7",
     "webpack-dev-middleware": "^3.7.1",
-    "webpack-dev-server": "^3.8.0"
+    "webpack-dev-server": "^3.8.0",
+    "webpack-merge": "^4.2.2"
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
     "@babel/runtime": "^7.5.5",
-    "@babel/runtime-corejs2": "^7.5.5"
+    "@babel/runtime-corejs2": "^7.5.5",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0"
   }
 }
