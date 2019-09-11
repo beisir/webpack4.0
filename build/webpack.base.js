@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const CleanWebpackPlugin = require("clean-webpack-plugin");
-
+const webpack = require('webpack');
 module.exports = {
     entry: {
         main: './src/index.js'
@@ -42,7 +42,12 @@ module.exports = {
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                loader: "babel-loader",
+                use: [
+                    {loader: "babel-loader"},
+                    // {   // 改变模块内的this的指向，
+                    //     loader: 'imports-loader?this=>window'
+                    // }
+                ]
                 // options: {  // 可以将options内的配置项放在.babelrc 文件内，整个对象直接迁移，但是不能有注释
                     /***************** 第一种： presets的babel配置  ******************/
                     // install --save-dev babel-loader @babel/core @babel/preset-env：进行语法转换
@@ -79,7 +84,9 @@ module.exports = {
         ]
     },
     optimization: {  // Tree Shaking 在开发环境是没有的
-
+        runtimeChunk: {     // 抽离vendors 和 main 之间的js的关联代码
+            name: 'runtime'
+        },
         // Tree Shaking 模式在development 只是提示作用，但是在 production模式才会真正运用，甚至不需要写 optimization这个配置
         usedExports: true,   // 开启之后还需要设置package.json =>  "sideEffects": ["@babel/polly-fill", "*.css"],
         // 代码分隔和webpack无关。webpack中实现代码分隔：两种方式
@@ -89,27 +96,28 @@ module.exports = {
         // 异步代码实例 import("lodash").then(() => {...});
         splitChunks: {  // 代码分隔,当遇到公共的类库时，会自动将公共库分离打包，
             chunks: "all", // async 异步代码分隔  all 同步异步代码都进行分隔, 默认只为异步代码进行分隔，如果为all 则需要记性cacheGroups 
-            minSize: 30000,    // 打包代码小于minSize 则不单独打包，不做代码分隔
-            minChunks: 1,      // 当一个模块被用了至少多少次的时候才进行代码分隔 
-            maxAsyncRequests: 5,    // 同时加载的模块数最多是5个，超过5个，就不做代码分隔
-            maxInitialRequests: 3,  // 入口文件最多引入3个库，进行代码分隔，超过之后就不做分隔
-            automaticNameDelimiter: '_',    // 文件生成之后进行分隔，在不设置filename的情况下
-            name: true,
-            cacheGroups: {  // 缓存组
-                vendors: {  // 如果chunks = all 进行下方配置
-                    test: /[\\/]node_modules[\\/]/,     // 引入的库是否是在node_modules内 
-                    priority: -10,  // 优先级，如果符合缓存组的条件，则看优先级    
-                    // filename: "vendors.js"   //  设置打包之后的文件名 
-                },
-                default: {  // 如果打包的代码 小于minSize 且不在node_modules 内，则执行下面配置
-                    // minChunks: 2,    
-                    priority: -20,  // 优先级   
-                    reuseExistingChunk: true,   // 如果一个模块已经被打包过了，则在打包的时候直接使用之前打包的
-                    filename: 'default.js'
-                }
-            }  
+            // minSize: 30000,    // 打包代码小于minSize 则不单独打包，不做代码分隔
+            // minChunks: 1,      // 当一个模块被用了至少多少次的时候才进行代码分隔 
+            // maxAsyncRequests: 5,    // 同时加载的模块数最多是5个，超过5个，就不做代码分隔
+            // maxInitialRequests: 3,  // 入口文件最多引入3个库，进行代码分隔，超过之后就不做分隔
+            // automaticNameDelimiter: '_',    // 文件生成之后进行分隔，在不设置filename的情况下
+            // name: true,
+            // cacheGroups: {  // 缓存组
+            //     vendors: {  // 如果chunks = all 进行下方配置
+            //         test: /[\\/]node_modules[\\/]/,     // 引入的库是否是在node_modules内 
+            //         priority: -10,  // 优先级，如果符合缓存组的条件，则看优先级    
+            //         // filename: "vendors.js"   //  设置打包之后的文件名 
+            //     },
+            //     default: {  // 如果打包的代码 小于minSize 且不在node_modules 内，则执行下面配置
+            //         // minChunks: 2,    
+            //         priority: -20,  // 优先级   
+            //         reuseExistingChunk: true,   // 如果一个模块已经被打包过了，则在打包的时候直接使用之前打包的
+            //         filename: 'default.js'
+            //     }
+            // }  
         } 
     },
+    performance: false, // 不显示警告
     plugins: [  // plugin可以在webpack运行到某个时刻的时候，帮你做一些事情，类似生命周期函数
         new HtmlWebpackPlugin({ // 会在打包结束后自动生成一个html文件，并把打包生成的js自动引入html中
             title: "webpack4.0",
@@ -118,5 +126,13 @@ module.exports = {
         new CleanWebpackPlugin(['dist'], {   // 清除打包文件夹
             root: path.resolve(__dirname, '../')    // 当前目录的上一级
         }), 
+        // 配置 shimming
+        // new webpack.ProvidePlugin({     // node_modules内的模块是不能修改类库。里面用到的依赖可以使用这种方式，让他自行引用
+        //     $: 'jquery',    // 相当于在没有引用jquery的模块下 自动引用了jquery
+        //     _: 'lodash',
+        //     _join: ['lodash', 'join']       // 这种引用相当于 _join = lodash.join
+        // })
+
+
     ],
 };
